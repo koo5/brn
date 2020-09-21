@@ -1,0 +1,3 @@
+name: brn
+dependencies:
+  - python=3.8

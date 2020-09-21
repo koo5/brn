@@ -1,0 +1,42 @@
+# random ontological fragments
+```
+class Timepoint:
+	optional n-to-n relation to another Timepoint:
+		"is before"
+		"is after"
+	optional 1-to-1 relation to Literal:
+		
+class Query:
+	optional bool:
+		"is_commercial"
+
+
+class Task:
+	bool:
+		"is_in_progress"
+	Processor
+		"last_known_task_processor"
+		
+===
+"was in progress more than 30 minutes"
+"was in progress more than 7 times"
+
+
+
+```
+
+
+# ?
+
+{a b c} => {d e f}
+
+======>
+
+[ has_universal a, b, c, d, e;
+ has_existential f;
+ 
+ --- and then we might either do: ---
+ 
+ has_antecedent {a b c};
+ has_consequent {d e f}
+

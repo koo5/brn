@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title>The RDF 1.1 Test Vocabulary</title>
+	<meta name="generator" content="LibreOffice 6.0.7.3 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2020-09-15T16:00:06.345491075"/>
+	<meta name="" content=""/>
+	<!-- base href="http://www.w3.org/ns/rdftest" -->
+	<style type="text/css">
+		p { color: #000000; font-family: sans-serif }
+		h1 { background: #ffffff; font-variant: normal; color: #005a9c; font-family: sans-serif; font-style: normal; font-weight: normal; text-align: left }
+		h2 { background: #ffffff; font-variant: normal; color: #005a9c; font-family: sans-serif; font-style: normal; font-weight: normal; text-align: left }
+		h3 { background: #ffffff; font-variant: normal; color: #005a9c; font-family: sans-serif; font-style: normal; font-weight: normal; text-align: left }
+		p.copyright { font-family: sans-serif }
+		code.cjk { font-family: "DejaVu Sans Mono", monospace }
+	</style>
+</head>
+<body lang="en-US" text="#000000" bgcolor="#ffffff" dir="ltr" style="border: none; padding: 0in">
+<p><a href="http://www.w3.org/">
+  <font color="#000080">
+    <img src="../../Downloads/The%20RDF%201.1%20Test%20Vocabulary_files/w3c_home.png" name="Image1" alt="W3C" align="bottom" width="72" height="48" border="1"/>
+  </font>
+</a>
+</p>
+<h1>The RDF 1.1 Test Vocabulary</h1>
+<p>This is a vocabulary document and is used to define classes and
+properties used in <a href="http://www.w3.org/TR/2014/NOTE-rdf11-primer-20140225/">RDF
+1.1 Test Cases</a> and associated test manifests. The URI of the
+vocabulary is <code class="western">http://www.w3.org/ns/rdftest#</code>
+(abbreviated by <code class="western">rdft:</code> in this document).
+<a href="http://www.w3.org/ns/rdftest.ttl">Turtle</a> and an <a href="http://www.w3.org/ns/rdftest.jsonld">JSON-LD</a>
+versions of the vocabulary are also available. The vocabulary is
+published by <a href="http://www.w3.org/">W3C</a>. 
+</p>
+<h2>Vocabulary Terms</h2>
+<p>The vocabulary terms below constitute the complete RDF Test
+vocabulary.</p>
+<h3>Classes</h3>
+<p>The vocabulary defines the following class hierarchy:</p>
+<ul>
+	<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:Approval</code>
+	– Approval. The superclass of all test approval statuses. Note -
+	these subclassess(?) are actually used as instances:</p>
+	<ul>
+		<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:Approved</code></p>
+		<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:Proposed</code></p>
+		<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:Rejected</code></p>
+	</ul>
+	<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:Test</code></p>
+	<ul>
+		<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestEval</code>
+		– Test Evaluation</p>
+		<ul>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTrigEval</code>
+			– A positive <a href="http://www.w3.org/TR/2014/REC-trig-20140225/">TriG</a>
+			evaluation test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTrigNegativeEval</code>
+			– A negative <a href="http://www.w3.org/TR/2014/REC-trig-20140225/">TriG</a>
+			evaluation test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTurtleEval</code>
+			– A positive <a href="http://www.w3.org/TR/2014/REC-turtle-20140225/">Turtle</a>
+			evaluation test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTurtleNegativeEval</code>
+			– A negative <a href="http://www.w3.org/TR/2014/REC-turtle-20140225/">Turtle</a>
+			evaluation test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:XMLEval</code>
+			– A positive <a href="http://www.w3.org/TR/2014/REC-rdf-syntax-grammar-20140225/">RDF/XML</a>
+			evaluation test.. 
+			</p>
+		</ul>
+		<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestSyntax</code>
+		– Test Syntax. Superclass of all RDF Syntax Tests.. 
+		</p>
+		<ul>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestNTriplesNegativeSyntax</code>
+			– N-Triples Negative Syntax. A negative <a href="http://www.w3.org/TR/2014/REC-n-triples-20140225/">N-Triples</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestNTriplesPositiveSyntax</code>
+			– N-Triples Positive Syntax. A positive <a href="http://www.w3.org/TR/2014/REC-n-triples-20140225/">N-Triples</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestNQuadsNegativeSyntax</code>
+			– N-Quads Negative Syntax. A negative <a href="http://www.w3.org/TR/2014/REC-n-quads-20140225/">N-Quads</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestNQuadsPositiveSyntax</code>
+			– N-Quads Positive Syntax. A positive <a href="http://www.w3.org/TR/2014/REC-n-quads-20140225/">N-Quads</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTriGNegativeSyntax</code>
+			– TriG Negative Syntax. A negative <a href="http://www.w3.org/TR/2014/REC-trig-20140225/">TriG</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTriGPositiveSyntax</code>
+			– TriG Positive Syntax. A positive <a href="http://www.w3.org/TR/2014/REC-trig-20140225/">TriG</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTurtleNegativeSyntax</code>
+			– Turtle Negative Syntax. A negative <a href="http://www.w3.org/TR/2014/REC-turtle-20140225/">Turtle</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p style="margin-bottom: 0in"><code class="western">rdft:TestTurtlePositiveSyntax</code>
+			– Turtle Positive Syntax. A positive <a href="http://www.w3.org/TR/2014/REC-turtle-20140225/">Turtle</a>
+			syntax test.. 
+			</p>
+			<li/>
+<p><code class="western">rdft:TestXMLNegativeSyntax</code> –
+			RDF/XML Negative Syntax. A negative <a href="http://www.w3.org/TR/2014/REC-rdf-syntax-grammar-20140225/">RDF/XML</a>
+			syntax test.. 
+			</p>
+		</ul>
+	</ul>
+</ul>
+<h3>Properties</h3>
+<p>The vocabulary defines the following properties:</p>
+<ul>
+	<li/>
+<p><code class="western">rdft:approval</code> – approval.
+	Approval status of a test.. This predicate has a domain of <a href="#Test">rdft:Test</a>
+	and a range of <a href="#Approval">rdft:Approval</a>. 
+	</p>
+</ul>
+<hr/>
+
+<p class="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a>
+© 2013 <a href="http://www.w3.org/">W3C</a><sup>®</sup> (<a href="http://www.csail.mit.edu/">MIT</a>,
+<a href="http://www.ercim.eu/">ERCIM</a>, <a href="http://www.keio.ac.jp/">Keio</a>,
+<a href="http://ev.buaa.edu.cn/">Beihang</a>), All Rights Reserved.
+W3C <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>,
+<a href="http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a>
+and <a href="http://www.w3.org/Consortium/Legal/copyright-documents">document
+use</a> rules apply.</p>
+</body>
+</html>

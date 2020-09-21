@@ -1,0 +1,136 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
+@prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
+@prefix et:     <https://comunica.github.io/ontology-query-testing/ontology-query-testing.ttl#> .
+@prefix :       <https://comunica.github.io/manifest-ldf-tests/sparql/sparql-manifest.ttl#> .
+
+<>  rdf:type mf:Manifest ;
+  rdfs:label "SPARQL query library" ;
+  mf:entries
+  ( 
+  :directors01
+  :software02
+  :simple03
+  :common04
+  :missing05
+  :schrodinger06
+  :extends07
+  :belgium08
+  :300triples09
+  :annepubs10
+  ) .
+
+:directors01 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBpedia TPF" ;
+  rdfs:comment "Directors of movies starring Brad Pitt" ;
+  mf:action
+        [ qt:query  <directors01.rq> ;
+          et:mockFolder <directors01> ] ;
+  et:dataSources(
+    [ et:source <http://fragments.dbpedia.org/2016-04/en> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <directors01/result.srj> . 
+  
+:software02 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBpedia TPF" ;
+  rdfs:comment "Belgian software" ;
+  mf:action
+        [ qt:query  <software02.rq> ;
+          et:mockFolder <software02> ] ;
+  et:dataSources(
+    [ et:source <http://fragments.dbpedia.org/2016-04/en> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <software02/result.srj> . 
+
+:simple03 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBPedia TPF & SPARQL" ;
+  rdfs:comment "Simple bindings with the city 'Aalter' as object" ;
+  mf:action
+        [ qt:query  <simple03.rq> ;
+          et:mockFolder <simple03> ] ;
+  et:dataSources (
+    [ et:source <http://dbpedia.org/sparql> ;
+      et:sourceType et:SPARQL ] ) ;
+  mf:result  <simple03/result.srj> .
+
+:common04 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBPedia TPF & Ruben(s)' FILE" ;
+  rdfs:comment "All common interests of Ruben V and Ruben T" ;
+  mf:action
+        [ qt:query  <common04.rq> ;
+          et:mockFolder <common04> ] ;
+  et:dataSources (
+    [ et:source <http://fragments.dbpedia.org/2016-04/en> ;
+      et:sourceType et:TPF ]
+    [ et:source <common04/rubent.html> ;
+      et:sourceType et:File ]
+    [ et:source <common04/rubenv.ttl> ;
+      et:sourceType et:File ] ) ;
+  mf:result  <common04/result.srj> .
+
+:missing05 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBPedia TPF" ;
+  rdfs:comment "The missing link between Vermeersch and Mortier" ;
+  mf:action
+        [ qt:query  <missing05.rq> ;
+          et:mockFolder <missing05> ] ;
+  et:dataSources (
+    [ et:source <http://data.linkeddatafragments.org/ugent-biblio> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <missing05/result.srj> .
+
+:schrodinger06 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "ASK - DBPedia TPF" ;
+  rdfs:comment "Erwin Schrödinger working at Ghent University" ;
+  mf:action
+        [ qt:query  <schrodinger06.rq> ;
+          et:mockFolder <schrodinger06> ] ;
+  et:dataSources (
+    [ et:source <http://fragments.dbpedia.org/2016-04/en> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <schrodinger06/result.srj> .
+
+:extends07 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - LOV TPF" ;
+  rdfs:comment "All classes extending dcat:Dataset" ;
+  mf:action
+        [ qt:query  <extends07.rq> ;
+          et:mockFolder <extends07> ] ;
+  et:dataSources (
+    [ et:source <http://data.linkeddatafragments.org/lov> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <extends07/result.srj> .
+
+:belgium08 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT, OPTIONAL - Geonames TPF" ;
+  rdfs:comment "All countryCodes of places named 'Belgium'" ;
+  mf:action
+        [ qt:query  <belgium08.rq> ;
+          et:mockFolder <belgium08> ] ;
+  et:dataSources (
+    [ et:source <http://data.linkeddatafragments.org/geonames> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <belgium08/result.srj> .
+
+:300triples09 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - DBpedia TPF" ;
+  rdfs:comment "300 triples in DBpedia" ;
+  mf:action
+        [ qt:query  <300triples09.rq> ;
+          et:mockFolder <300triples09> ] ;
+  et:dataSources (
+    [ et:source <https://fragments.dbpedia.org/2016-04/en> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <300triples09/result.srj> .
+
+:annepubs10 rdf:type et:LdfQueryEvaluationTest ;
+  mf:name    "SELECT - Biblio TPF" ;
+  rdfs:comment "Publications by Anne De Paepe" ;
+  mf:action
+        [ qt:query  <annepubs10.rq> ;
+          et:mockFolder <annepubs10> ] ;
+  et:dataSources (
+    [ et:source <http://data.linkeddatafragments.org/ugent-biblio> ;
+      et:sourceType et:TPF ] ) ;
+  mf:result  <annepubs10/result.srj> .
