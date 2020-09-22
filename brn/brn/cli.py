@@ -6,28 +6,22 @@ This is the entry point for the command-line interface (CLI) application.
 .. currentmodule:: brn.cli
 .. moduleauthor:: koo <my_email@gmail.com>
 """
+
 import logging
 import click
 from .__init__ import __version__
-import pdb; pdb.set_trace()
-from tau_testcase_parser import *
+#import pdb; pdb.set_trace()
+from .tau_testcase_parser import *
 
-
-LOGGING_LEVELS = {
-    0: logging.NOTSET,
-    1: logging.ERROR,
-    2: logging.WARN,
-    3: logging.INFO,
-    4: logging.DEBUG,
-}  #: a mapping of `verbose` option counts to logging levels
 
 
 class Info(object):
-    """An information object to pass data between CLI functions."""
+	"""An information object to pass data between CLI functions."""
 
-    def __init__(self):  # Note: This object must have an empty constructor.
-        """Create a new instance."""
-        self.verbose: int = 0
+	def __init__(self):  # Note: This object must have an empty constructor.
+		"""Create a new instance."""
+		# self.verbose: int = 0
+		pass
 
 
 # pass_info is a decorator for functions that pass 'Info' objects.
@@ -40,23 +34,28 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option("--verbose", "-v", count=True, help="Enable verbose output.")
 @pass_info
 def cli(info: Info, verbose: int):
-    """Run brn."""
-    # Use the verbosity count to determine the logging level...
-    if verbose > 0:
-        logging.basicConfig(
-            level=LOGGING_LEVELS[verbose]
-            if verbose in LOGGING_LEVELS
-            else logging.DEBUG
-        )
-        click.echo(
-            click.style(
-                f"Verbose logging is enabled. "
-                f"(LEVEL={logging.getLogger().getEffectiveLevel()})",
-                fg="yellow",
-            )
-        )
-    info.verbose = verbose
+	"""Run brn."""
+	verbosity = verbose
+	del verbose
 
+	"""
+	user sets verbosity, with how many -v's they invoke the command with, but python logging is based on filtering by severity level.
+	the more verbose, the less severity required of a log message to display it.
+	"""
+	VERBOSITY_to_SEVERITY = [
+		logging.FATAL,
+		logging.INFO,
+		logging.DEBUG,
+		logging.NOTSET # NOTSET should be the last
+	]  #: a mapping of `verbosity` option counts to logging levels.
+	logging.basicConfig(
+		level=element_by_index_upper_clipped(VERBOSITY_to_SEVERITY, verbosity)
+	)
+	if verbosity > 0:
+		click.echo(click.style(
+			f"Logging severity filter level: {logging.getLogger().getEffectiveLevel()}",
+			fg="yellow"#, blink=True
+		))
 
 
 
@@ -64,23 +63,28 @@ def cli(info: Info, verbose: int):
 @pass_info
 @click.argument('main_directory', type=click.Path())
 def parse_tau_testcases(_: Info, main_directory):
-    """Parse tau testcases in all subdirectories of main_directory.
-    main_directory is probably tests/."""
-    click.echo("scanning " + main_directory)
-    print(subfolder_paths(AbsPath(main_directory)))
+	"""Parse tau testcases in all subdirectories of main_directory.
+	main_directory is probably tests/."""
+	logging.getLogger(__name__).info("scanning " + main_directory)
+	paths = find_all_files_recursively(AbsPath(main_directory))
+	logging.getLogger(__name__).info(f'found files: {paths}')
+	for i in paths:
+		parse_testcase(i)
+
+
 
 
 
 @cli.group()
 def cli2():
-    """Run cli2."""
-    pass
+	"""Run cli2."""
+	pass
 
 
 @cli2.command()
 def version():
-    """Get the library version."""
-    click.echo(click.style(f"{__version__}", bold=True))
+	"""Get the library version."""
+	click.echo(click.style(f"{__version__}", bold=True))
 
 
 

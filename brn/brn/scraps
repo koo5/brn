@@ -1,0 +1,3 @@
+def subfolder_paths(path: Path):
+	paths = sorted([ f.path for f in os.scandir(path.value) if f.is_dir() ])
+	return [ Path(x) for x in paths ]
