@@ -5,6 +5,12 @@ from enum import Enum, auto
 from .locators import *
 from .dotdict import Dotdict
 
+def showtriples():
+	statements = conn.getStatements()
+	with statements:
+		for statement in statements:
+			logging.getLogger(__name__).info(f'quad({statement})')
+
 def find_all_files_recursively(path: Path):
 	paths = []
 	for p in pathlib.Path(path.value).rglob('*'):
@@ -45,12 +51,12 @@ class Mode(Enum):
 
 
 
-def parse_testcase(p: Path):
+def parse_testcase(conn, p: Path):
 	fn = p.value
 	logging.getLogger(__name__).info(f'parsing {fn}')
 	assert isinstance(fn, pathlib.PosixPath)
 	with fn.open() as f:
-		c = Context(f, fn)
+		c = Context(f, fn, conn)
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
 		c.interpret()
@@ -62,7 +68,8 @@ class Context:
 	base = "";
 	"""
 
-	def __init__(self, input, base_uri):
+	def __init__(self, input, base_uri, conn):
+		self.conn = conn
 		self.input = input
 		self.base_uri = base_uri
 		self.mode_stack = []
@@ -113,6 +120,14 @@ class Context:
 					self.mode_stack.pop()
 				else:
 					self.rdf_lines.append(l)
+		self.save_testcase()
+
+	def save_testcase(self):
+		uid = self.conn.createBNode()
+		self.data['@id'] = uid
+		self.conn.addData(self.data)
+		showtriples()
+		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
 
 	def process_command_tokens(self):
 		while len(self.tokens):

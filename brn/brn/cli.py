@@ -15,6 +15,8 @@ from .version import __version__
 #import pdb; pdb.set_trace()
 from .tau_testcase_parser import *
 from .locators import *
+from franz.openrdf.connect import ag_connect
+import os
 
 
 class Info(object):
@@ -70,8 +72,17 @@ def parse_tau_testcases(_: Info, main_directory):
 	logging.getLogger(__name__).info("scanning " + main_directory)
 	paths = find_all_files_recursively(AbsPath(main_directory))
 	logging.getLogger(__name__).info(f'found files: {paths}')
-	for i in paths:
-		parse_testcase(i)
+	with ag_connect(
+			repo=os.environ['SEMANTIC_DESKTOP_AGRAPH_REPO'],
+			host=os.environ['SEMANTIC_DESKTOP_AGRAPH_HOST'],
+			port=os.environ['SEMANTIC_DESKTOP_AGRAPH_PORT'],
+			user=os.environ['SEMANTIC_DESKTOP_AGRAPH_USER'],
+			password=os.environ['SEMANTIC_DESKTOP_AGRAPH_PASS'],
+			clear=True
+			) as conn:
+		print (conn.size())
+		for i in paths:
+			parse_testcase(conn, i)
 
 
 
