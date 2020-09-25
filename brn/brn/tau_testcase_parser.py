@@ -2,8 +2,8 @@ import logging
 import shlex
 import pathlib
 from enum import Enum, auto
-from locators import *
-from dotdict import Dotdict
+from .locators import *
+from .dotdict import Dotdict
 
 def find_all_files_recursively(path: Path):
 	paths = []
@@ -19,12 +19,29 @@ def element_by_index_upper_clipped(array, index):
 	else:
 		return array[-1]
 
+def human_friendly_setting_value(x):
+	try:
+		return x.name
+	except:
+		return x
+
+
+def is_url(x):
+	if x.startswith('http://'):
+		return True
+	if x.startswith('file://'):
+		return True
+
+
+class ParsingError(Exception):
+	pass
 
 class Mode(Enum):
 	COMMANDS = auto()
 	KB = auto()
 	QUERY = auto()
 	SHOULDBE = auto()
+	SHOULDBEERROR = auto()
 
 
 
@@ -33,7 +50,7 @@ def parse_testcase(p: Path):
 	logging.getLogger(__name__).info(f'parsing {fn}')
 	assert isinstance(fn, pathlib.PosixPath)
 	with fn.open() as f:
-		c = Context(f)
+		c = Context(f, fn)
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
 		c.interpret()
@@ -44,38 +61,55 @@ class Context:
 	format = "";
 	base = "";
 	"""
-	def __init__(self, input):
+
+	def __init__(self, input, base_uri):
 		self.input = input
+		self.base_uri = base_uri
 		self.mode_stack = []
-		self.data = {'testcases': []}
+		"""
+		one Context/input/tau-testcase-file produces one test "setup", here stored in self.data. Such "setup" has multiple kb_texts and multiple queries, each which an optional shouldbe. 
+		"""
+		self.data = Dotdict({'queries': []})
 		self.settings = Dotdict()
+		self.common_text = []
+		self.rdf_lines = []
+		self.kb_texts = []
+
+	@property
+	def mode(self):
+		return self.mode_stack[-1]
 
 	def set_mode(self, mode):
-		self.mode_stack.push(mode)
+		self.mode_stack.append(mode)
 		self.print_setting('mode', self.mode)
 
 	def set_setting(self, k, v):
 		self.print_setting(k,v)
 		self.settings[k] = v
 
-	def self.print_setting(self, k,v):
+	def print_setting(self, k,v):
 		logging.getLogger(__name__).info(f'#{k} = {human_friendly_setting_value(v)}')
 
-	def human_friendly_setting_value(x):
-		try:
-			return x.name
-		except:
-			return x
-
-	def interpret():
-		while l = f.readline():
+	def interpret(self):
+		for l in self.input:
 			if self.mode == Mode.COMMANDS:
-				self.tokens = shlex.split(l)
+				ls = l.lstrip()
+				if ls == '':
+					continue
+				if ls.startswith('#'):
+					continue
+				if ls.startswith('@'):
+					self.common_text.append(l)
+					continue
+				try:
+					self.tokens = shlex.split(l)
+				except Exception as e:
+					raise ParsingError(f'when tokenizing {l.__repr__()}:'+str(e))
 				self.process_command_tokens()
 			else:
 				l2 = l.strip()
 				if l2 == 'fin.':
-					self.on_complete_rdf_text()
+					self.on_complete_rdf_text(self.base_uri)
 					self.mode_stack.pop()
 				else:
 					self.rdf_lines.append(l)
@@ -83,20 +117,48 @@ class Context:
 	def process_command_tokens(self):
 		while len(self.tokens):
 			token = self.tokens.pop(0)
+			if token == 'kb':
+				self.set_mode(Mode.KB)
+			elif token == 'query':
+				self.set_mode(Mode.QUERY)
+			elif token == 'shouldbe':
+				self.set_mode(Mode.SHOULDBE)
+			elif token == 'shouldbetrue':
+				"""means that,
+				in backward chaining, the query should succeed
+				in forward chaining, it should be possible to unify the query graph with a subset of the result graph
+				"""
+			elif token == 'shouldbeerror':
+				self.set_mode(Mode.SHOULDBEERROR)
+			elif token == 'thatsall':
+				"""
+				a thatsall means that the runner should wait for further results from the reasoner, or for its termination. That is, it should check that the engine doesn't come up with more answers. If a thatsall is not present in a testcase file, this means that additional answers are allowed.
+				"""
+				self.tc.queries[-1].more_answers_forbidden = True
+			elif is_url(token):
+				self.rdf_lines = open('token').readlines()
+				self.on_complete_rdf_text(token)
+			else:
+				raise ParsingError(f'unrecognized token: {token.__repr__()}')
 
-	def on_complete_rdf_text(self):
+	def on_complete_rdf_text(self,base_uri):
 		text = '\n'.join(self.rdf_lines)
-		print('on_complete_rdf_text ' + text)
+		self.rdf_lines = []
+		logging.getLogger(__name__).info(f'#on_complete_rdf_text:\n{text}')
 		if self.mode == Mode.KB:
-			self.kb_text = text
+			self.kb_texts.append(Dotdict({'text':text,'base_uri':base_uri}))
 		if self.mode == Mode.QUERY:
 			tc = Dotdict()
-			self.data.testcases.append(tc)
+			self.data.queries.append(tc)
 			self.last_textcase = tc
-			tc.type = PYCO.query
-			tc.kb_text = self.kb_text
+			tc.type = 'query'
+			tc.kb_texts = self.kb_texts
 			tc.query_text = text
 		if self.mode == Mode.SHOULDBE:
 			if self.last_textcase == None:
 				raise err
 			self.last_textcase.shouldbe_text = text
+		if self.mode == Mode.SHOULDBEERROR:
+			if self.last_textcase == None:
+				raise err
+			self.last_textcase.shouldbeerror_text = text

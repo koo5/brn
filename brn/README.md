@@ -22,6 +22,14 @@ If you're going to be working in the code (rather than just using the library), 
 * [GNU Make](https://www.gnu.org/software/make/)
 * [Pandoc](https://pandoc.org/)
 
+## development installation
+there's some setuptools magic. I don't know how it works. Run `make`.
+
+## debugging
+pycharm run setup:
+
+activate the virtualenv and, after having run `make`, and `brn` is on your PATH somehow, run `which brn`. This is the "Script path" that you want to set in Pycharm run configuration. 
+
 ## Resources
 
 Below are some handy resource links.

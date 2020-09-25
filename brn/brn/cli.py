@@ -10,11 +10,11 @@ This is the entry point for the command-line interface (CLI) application.
 import logging
 import click
 
-from version import __version__
+from .version import __version__
 
 #import pdb; pdb.set_trace()
-from tau_testcase_parser import *
-from locators import *
+from .tau_testcase_parser import *
+from .locators import *
 
 
 class Info(object):
