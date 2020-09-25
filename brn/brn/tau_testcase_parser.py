@@ -134,7 +134,7 @@ class Context:
 				"""
 				a thatsall means that the runner should wait for further results from the reasoner, or for its termination. That is, it should check that the engine doesn't come up with more answers. If a thatsall is not present in a testcase file, this means that additional answers are allowed.
 				"""
-				self.tc.queries[-1].more_answers_forbidden = True
+				self.data.queries[-1].more_answers_forbidden = True
 			elif is_url(token):
 				self.rdf_lines = open('token').readlines()
 				self.on_complete_rdf_text(token)
