@@ -56,10 +56,7 @@ def cli(info: Info, verbose: int):
 		level=element_by_index_upper_clipped(VERBOSITY_to_SEVERITY, verbosity)
 	)
 	if verbosity > 0:
-		click.echo(click.style(
-			f"Logging severity filter level: {logging.getLogger().getEffectiveLevel()}",
-			fg="yellow"#, blink=True
-		))
+		logging.getLogger(__name__).info(f"Logging severity filter level: {logging.getLogger().getEffectiveLevel()}")
 
 
 

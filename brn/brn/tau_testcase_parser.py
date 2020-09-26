@@ -5,7 +5,7 @@ from enum import Enum, auto
 from .locators import *
 from .dotdict import Dotdict
 
-def showtriples():
+def showtriples(conn):
 	statements = conn.getStatements()
 	with statements:
 		for statement in statements:
@@ -37,6 +37,25 @@ def is_url(x):
 		return True
 	if x.startswith('file://'):
 		return True
+
+
+def _to_dict_recursively(ns, s):
+	if isinstance(s, Dotdict):
+		s = s._dict
+	if isinstance(s, dict):
+		r = {}
+		for k,v in s.items():
+			r[ns + ':' + k] = _to_dict_recursively(ns, v)
+		return r
+	elif isinstance(s, list):
+		r = []
+		for i in s:
+			r.append(_to_dict_recursively(ns, i))
+		return {'@list':r}
+	elif isinstance(s, pathlib.Path):
+		return str(s)
+	else:
+		return s
 
 
 class ParsingError(Exception):
@@ -123,11 +142,14 @@ class Context:
 		self.save_testcase()
 
 	def save_testcase(self):
+		d = _to_dict_recursively('xx:', self.data)
 		uid = self.conn.createBNode()
 		self.data['@id'] = uid
-		self.conn.addData(self.data)
-		showtriples()
+		logging.getLogger(__name__).info(f'#saving: {d}')
+		self.conn.addData(d)
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
+		showtriples(self.conn)
+
 
 	def process_command_tokens(self):
 		while len(self.tokens):
