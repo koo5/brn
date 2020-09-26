@@ -1,3 +1,14 @@
+"""
+parse a "tau testcase". previously implemented here: https://github.com/koo5/univar/blob/master/tau.cpp
+and here: https://github.com/koo5/univar/blob/master/pyin/tau2.py
+
+
+
+
+
+"""
+
+
 import logging
 import shlex
 import pathlib
