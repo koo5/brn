@@ -16,6 +16,7 @@ from .version import __version__
 from .tau_testcase_parser import *
 from .locators import *
 from franz.openrdf.connect import ag_connect
+from franz.openrdf.vocabulary.rdf import RDF
 import os
 
 
@@ -62,7 +63,7 @@ def cli(info: Info, verbose: int):
 
 @cli.command()
 @pass_info
-@click.argument('main_directory', type=click.Path())
+@click.argument('main_directory', nargs=1, type=click.Path(allow_dash=True, readable=True, exists=True, dir_okay=True), required=True)
 def parse_tau_testcases(_: Info, main_directory):
 	"""Parse tau testcases in all subdirectories of main_directory.
 	main_directory is probably tests/."""
@@ -77,11 +78,10 @@ def parse_tau_testcases(_: Info, main_directory):
 			password=os.environ['SEMANTIC_DESKTOP_AGRAPH_PASS'],
 			clear=True
 			) as conn:
-		print (conn.size())
+		uris = []
 		for i in paths:
-			parse_testcase(conn, i)
-
-
+			uris.append(parse_testcase(conn, i))
+		conn.addData({'@id':'https://rdf.localhost/last_tau_testcases_parsed', RDF.VALUE:{'@list':uris}})
 
 
 
@@ -95,10 +95,4 @@ def cli2():
 def version():
 	"""Get the library version."""
 	click.echo(click.style(f"{__version__}", bold=True))
-
-
-
-
-
-
 

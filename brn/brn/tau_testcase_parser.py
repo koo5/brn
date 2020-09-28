@@ -136,7 +136,12 @@ class Context:
 				if ls.startswith('#'):
 					continue
 				if ls.startswith('@'):
-					self.common_text.append(l)
+					if ls.startswith('@include'):
+						tokens = shlex.split(ls)
+						self.common_text.extend(self.lexically_include_file(tokens[1]))
+					else:
+						"""the "header", before any commands, is allowed include @prefix or other @ declarations. It will be prepended to everything"""
+						self.common_text.append(l)
 					continue
 				try:
 					self.tokens = shlex.split(l)
@@ -149,8 +154,14 @@ class Context:
 					self.on_complete_rdf_text(self.base_uri)
 					self.mode_stack.pop()
 				else:
+					if l2.startswith('@include'):
+						tokens = shlex.split(l2)
+						self.rdf_lines.extend(self.lexically_include_file(tokens[1]))
 					self.rdf_lines.append(l)
 		self.save_testcase()
+
+	def lexically_include_file(self, path):
+		return open(path).readlines()
 
 	def save_testcase(self):
 		d = _to_dict_recursively('xx:', self.data)
