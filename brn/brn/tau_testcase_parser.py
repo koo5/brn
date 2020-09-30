@@ -51,23 +51,25 @@ def _to_dict_recursively(ns, s):
 	"""this problem wouldn't exist in js. That is, dict keys can be written with dot notation, in js, so no need for Dotdict."""
 	if isinstance(s, Dotdict):
 		s = s._dict
-	"""This problem would exist, because the keys need to conform to some basic IRI pattern to be accepted by json-ld. I think it might be better if triplestores etc accepted strings for predicates. But since we are here already, we might as well come up with some good namespace here. It will be kinda ridiculous that there might be predicates in that namespace that mean different things in different places, but hey, that's json. """
+
+	#This problem would exist, because the keys need to conform to some basic IRI pattern to be accepted by json-ld. I think it might be better if triplestores etc accepted strings for predicates. But since we are here already, we might as well come up with some good namespace here. It will be kinda ridiculous that there might be predicates in that namespace that mean different things in different places, but hey, that's json.
+
 	if isinstance(s, dict):
 		r = {}
 		for k,v in s.items():
 			r[ns + ':' + k] = _to_dict_recursively(ns, v)
 		return r
-	"""
-	just a required, mechanical translation into json-ld. A json list, in json-ld, means a set. Actually, that's really silly, because it complicates going from json to rdf, and is only useful for representing (complex-beyond-json) rdf in json-ld, right? which is something nobody really cares about, you can pick any other serialization, right? Do we really care about dumbing things back down into json? (i dont, right now) 
-	"""
+
+	#just a required, mechanical translation into json-ld. A json list, in json-ld, means a set. Actually, that's really silly, because it complicates going from json to rdf, and is only useful for representing (complex-beyond-json) rdf in json-ld, right? which is something nobody really cares about, you can pick any other serialization, right? Do we really care about dumbing things back down into json? (i dont, right now)
+
 	elif isinstance(s, list):
 		r = []
 		for i in s:
 			r.append(_to_dict_recursively(ns, i))
 		return {'@list':r}
-	"""
-	custom types like this might fare better in js too, but idk yet..
-	"""
+
+	#custom types like this might fare better in js too, but idk yet..
+
 	elif isinstance(s, pathlib.Path):
 		return str(s)
 	else:
@@ -99,11 +101,12 @@ def parse_testcase(conn, p: Path):
 
 class Context:
 	"""
-	format = "";
-	base = "";
+	a Context is something like a current input channel. You could invoke the parser/runner with a bunch of command line arguments. A context would be created to parse those arguments. One of them is a .tau file, so a nested context would be created for it, and so on. Irc/interactive input is also considered. None of this is implemented in this version though, and i don't think i'll bother with it so i should probably change the design here...
 	"""
 
 	def __init__(self, input, base_uri, conn):
+		#format = "";
+		#base = "";
 		self.conn = conn
 		self.input = input
 		self.base_uri = base_uri
