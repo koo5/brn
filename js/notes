@@ -1,0 +1,5 @@
+possible alternatives to python click:
+http://yargs.js.org/
+https://github.com/tj/commander.js
+meta: 
+	https://pantas.net/node_argument_parsers/
