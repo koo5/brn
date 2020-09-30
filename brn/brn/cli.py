@@ -119,11 +119,13 @@ def run_testcases(profile, executable, iri):
 					q(X, has_status, S),
 					if S == failed:
 						q(X has_error E)
-							
 
+					else:
+						if S == succeded:
 
-					/*q(X, has_results, Results_list),
-					rdf_list_length(Results_list)*/
+							q(X, has_results, Results_list),
+							rdf_list_length(Results_list)
+
 
 
 
