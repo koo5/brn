@@ -96,7 +96,8 @@ def parse_testcase(conn, p: Path):
 		c = Context(f, fn, conn)
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
-		c.interpret()
+		return c.interpret()
+
 
 
 class Context:
@@ -166,19 +167,24 @@ class Context:
 						tokens = shlex.split(l2)
 						self.rdf_lines.extend(self.lexically_include_file(tokens[1]))
 					self.rdf_lines.append(l)
-		self.save_testcase()
+		return self.save_testcase()
 
 	def lexically_include_file(self, path):
 		return open(path).readlines()
 
 	def save_testcase(self):
-		d = _to_dict_recursively('xx:', self.data)
 		uid = self.conn.createBNode()
 		self.data['@id'] = uid
+		d0 = _to_dict_recursively('xx:', self.data)
+		d = {
+			"@id": "http://franz.com/mygraph1",
+  			"@graph":[d0]
+  		}
 		logging.getLogger(__name__).info(f'#saving: {d}')
 		self.conn.addData(d)
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
-		showtriples(self.conn)
+		#showtriples(self.conn)
+		return uid
 
 
 	def process_command_tokens(self):

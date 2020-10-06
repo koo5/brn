@@ -87,7 +87,16 @@ def parse_tau_testcases(_: Info, main_directory):
 		uris = []
 		for i in paths:
 			uris.append(parse_testcase(conn, i))
-		conn.addData({'@id':'https://rdf.localhost/last_tau_testcases_parsed', RDF.VALUE:{'@list':uris}})
+		conn.addData({
+			"@id": "http://franz.com/mygraph1",
+  			"@graph":
+  			[
+	  			{
+					'@id':'https://rdf.localhost/last_tau_testcases_parsed',
+					RDF.VALUE:{'@list':uris}
+				}
+			]
+		})
 
 
 
@@ -103,32 +112,27 @@ def version():
 	click.echo(click.style(f"{__version__}", bold=True))
 
 
+
 @cli.command()
 @click.argument('profile', nargs=1, type=str, required=True)
 @click.argument('executable', nargs=1, type=click.Path(readable=True, exists=True, dir_okay=False), required=False)
-@click.argument('IRI', nargs=1, type=str, required=True)
+@click.argument('IRI', nargs=1, type=str)
 
 def run_testcases(profile, executable, iri):
-	logging.getLogger(__name__).info(f': {iri}')
-	with my_ag_connect() as conn:
-		for testcase in iterate_rdf_list(iri):
-			if profile == 'pyco3':
-				subprocess.spawn([executable, '--task', task_uri])
-				while True:
-					q(task_uri, has_processing, X),
-					q(X, has_status, S),
-					if S == failed:
-						q(X has_error E)
-
-					else:
-						if S == succeded:
-
-							q(X, has_results, Results_list),
-							rdf_list_length(Results_list)
-
-
-
-
-
-
-
+	pass
+	# with my_ag_connect() as conn:
+	# 	#if iri == None:
+	# 		#iri =statements = conn.getStatements(
+	# 	logging.getLogger(__name__).info(f': {iri}')
+	# 	for testcase in iterate_rdf_list(iri):
+	# 		if profile == 'pyco3':
+	# 			subprocess.spawn([executable, '--task', task_uri])
+	# 			while True:
+	# 				q(task_uri, has_processing, X),
+	# 				q(X, has_status, S),
+	# 				if S == failed:
+	# 					q(X has_error E)
+	# 				else:
+	# 					if S == succeded:
+	# 						q(X, has_results, Results_list),
+	# 						rdf_list_length(Results_list)
