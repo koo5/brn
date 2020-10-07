@@ -87,7 +87,10 @@ def parse_tau_testcases(_: Info, main_directory):
 		graph = bn(conn, 'graph')
 		uris = []
 		for i in paths:
-			uris.append(parse_testcase(conn, i, graph))
+			uris.append({'@id':parse_testcase(conn, i, graph)})
+
+		#conn.addData({'@id':'http://xxx', RDF.VALUE:{'@list':['a','b']}})
+		#uris = ['a','b']
 
 		# <result> <rdf:value> <list> <graph>
 		# <list> <rdf:first> xxx <graph>
@@ -110,16 +113,17 @@ def parse_tau_testcases(_: Info, main_directory):
 		pointer = bn(conn, 'pointer')
 		conn.addData({
 			'@id':pointer,
-			RDF.VALUE:result,
-			'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph': graph
+			RDF.VALUE:{'@id':result},
+			'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph': {'@id':graph}
 		})
 
 		# <last_tau_testcases_parsed> <rdf:value> <pointer> <default graph>
 		conn.addData({
 			'@id':'https://rdf.localhost/last_tau_testcases_parsed',
-			RDF.VALUE:pointer
+			RDF.VALUE:{'@id':pointer}
 		})
 
+		logging.getLogger(__name__).info(f'#saved testcases IRI: {pointer}')
 
 
 @cli.group()
