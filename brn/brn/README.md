@@ -1,0 +1,1 @@
+just a simple parser of a simple reasoner testcase format. Next i will be adding the executor. Why is this overcomplicated by storing intermediate data in a triplestore rather than flinging around unstructured text? I try to explain here: https://github.com/software-for-immortality/software-for-immortality.github.io/blob/master/writings/1.md
