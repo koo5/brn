@@ -19,7 +19,6 @@ from franz.openrdf.connect import ag_connect
 from franz.openrdf.vocabulary.rdf import RDF
 import os
 
-
 class Info(object):
 	"""An information object to pass data between CLI functions."""
 
@@ -84,18 +83,41 @@ def parse_tau_testcases(_: Info, main_directory):
 	paths = find_all_files_recursively(AbsPath(main_directory))
 	logging.getLogger(__name__).info(f'found files: {paths}')
 	with my_ag_connect() as conn:
+		# ok this will need some serious explaining/visualization
+		graph = bn(conn, 'graph')
 		uris = []
 		for i in paths:
-			uris.append(parse_testcase(conn, i))
+			uris.append(parse_testcase(conn, i, graph))
+
+		# <result> <rdf:value> <list> <graph>
+		# <list> <rdf:first> xxx <graph>
+		# <list> <rdf:rest> xxx <graph>...
+		result = bn(conn, 'result')
 		conn.addData({
-			"@id": "http://franz.com/mygraph1",
+			"@id": graph,
   			"@graph":
   			[
 	  			{
-					'@id':'https://rdf.localhost/last_tau_testcases_parsed',
+					'@id':result,
+					'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result',
 					RDF.VALUE:{'@list':uris}
 				}
 			]
+		})
+
+		# <pointer> <rdf:value> <result> <default>
+		# <pointer> <data_is_in_graph> <graph> <default>
+		pointer = bn(conn, 'pointer')
+		conn.addData({
+			'@id':pointer,
+			RDF.VALUE:result,
+			'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph': graph
+		})
+
+		# <last_tau_testcases_parsed> <rdf:value> <pointer> <default graph>
+		conn.addData({
+			'@id':'https://rdf.localhost/last_tau_testcases_parsed',
+			RDF.VALUE:pointer
 		})
 
 
@@ -119,9 +141,9 @@ def version():
 @click.argument('IRI', nargs=1, type=str)
 
 def run_testcases(profile, executable, iri):
-	pass
-	# with my_ag_connect() as conn:
-	# 	#if iri == None:
+	with my_ag_connect() as conn:
+		if iri == None:
+			pass
 	# 		#iri =statements = conn.getStatements(
 	# 	logging.getLogger(__name__).info(f': {iri}')
 	# 	for testcase in iterate_rdf_list(iri):

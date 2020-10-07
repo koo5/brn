@@ -5,7 +5,7 @@ and here: https://github.com/koo5/univar/blob/master/pyin/tau2.py
 """
 
 
-import logging
+import logging,json
 import shlex
 import pathlib
 from enum import Enum, auto
@@ -45,6 +45,11 @@ def is_url(x):
 		return True
 	if x.startswith('file://'):
 		return True
+
+def bn(conn, suffix = ''):
+	if suffix != '':
+		suffix = '_' + suffix
+	return 'https://rdf.localhost/bn/'+conn.createBNode().id[2:] + suffix
 
 
 def _to_dict_recursively(ns, s):
@@ -88,7 +93,7 @@ class Mode(Enum):
 
 
 
-def parse_testcase(conn, p: Path):
+def parse_testcase(conn, p: Path, graph):
 	fn = p.value
 	logging.getLogger(__name__).info(f'parsing {fn}')
 	assert isinstance(fn, pathlib.PosixPath)
@@ -96,7 +101,7 @@ def parse_testcase(conn, p: Path):
 		c = Context(f, fn, conn)
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
-		return c.interpret()
+		return c.interpret(graph)
 
 
 
@@ -136,7 +141,7 @@ class Context:
 	def print_setting(self, k,v):
 		logging.getLogger(__name__).info(f'#{k} = {human_friendly_setting_value(v)}')
 
-	def interpret(self):
+	def interpret(self, graph):
 		for l in self.input:
 			if self.mode == Mode.COMMANDS:
 				ls = l.lstrip()
@@ -167,19 +172,21 @@ class Context:
 						tokens = shlex.split(l2)
 						self.rdf_lines.extend(self.lexically_include_file(tokens[1]))
 					self.rdf_lines.append(l)
-		return self.save_testcase()
+		return self.save_testcase(graph)
 
 	def lexically_include_file(self, path):
 		return open(path).readlines()
 
-	def save_testcase(self):
-		uid = self.conn.createBNode()
-		self.data['@id'] = uid
-		d0 = _to_dict_recursively('xx:', self.data)
+	def save_testcase(self, graph):#, , unique_uri_generator):
+		uid = bn(self.conn, 'testcase')
+		#uid = 'https://rdf.localhost/bn/' + uid.id
+		d0 = _to_dict_recursively('xx', self.data)
+		d0['@id'] = uid
 		d = {
-			"@id": "http://franz.com/mygraph1",
+			"@id": graph,
   			"@graph":[d0]
   		}
+		logging.getLogger(__name__).info(f'#saving: {json.dumps(d,indent=2)}')
 		logging.getLogger(__name__).info(f'#saving: {d}')
 		self.conn.addData(d)
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
