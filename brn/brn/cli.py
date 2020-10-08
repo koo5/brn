@@ -18,6 +18,8 @@ from .locators import *
 from franz.openrdf.connect import ag_connect
 from franz.openrdf.vocabulary.rdf import RDF
 import os
+from .sparql_helper import *
+
 
 class Info(object):
 	"""An information object to pass data between CLI functions."""
@@ -165,24 +167,45 @@ def version():
 @cli.command()
 @click.argument('profile', nargs=1, type=str, required=True)
 @click.argument('executable', nargs=1, type=click.Path(readable=True, exists=True, dir_okay=False), required=False)
-@click.argument('IRI', nargs=1, type=str)
+@click.argument('IRI', nargs=1, type=str, required=False)
 
 def run_testcases(profile, executable, iri):
 	with my_ag_connect() as conn:
+
+		conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')
+		conn.setNamespace('localhost', 'https://rdf.localhost/')
+
 		if iri == None:
-			'https://rdf.localhost/last_tau_testcases_parsed'
-		conn.getStatements(
-			contexts=[graph]
+			pointer = select_one_result_and_one_binding(conn, "localhost:last_tau_testcases_parsed rdf:value ?pointer.")
+		else:
+			pointer = '<'+iri+'>'
+
+		# what if the data is not in a graph? maybe we'll be able to CONSTRUCT one?
+
+		query = conn.prepareTupleQuery(query="""
+			SELECT * WHERE {
+			   ?pointer rdf:value ?result .
+			   ?pointer rdf2:data_is_in_graph ?graph .
+			}"""
+		)
+		query.setBinding('pointer', pointer)
+		r = select_one_result(conn, query)
+		graph = r['graph']
+
+
+		with conn.getStatements(
+			contexts=[graph],
 			tripleIDs=True
+		) as statements:
+			statements.enableDuplicateFilter()
+			for statement in statements:
+				print(statement)
 
 
-		# iri
-		# 	RDF.VALUE:
-				pointer
-		pointer
+		# pointer
 		# 	RDF.VALUE:
 		# 		result
-		result
+		# result
 		# 	'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph':
 		# 		graph
 		#

@@ -169,7 +169,7 @@ class Context:
 					self.on_complete_rdf_text(self.base_uri)
 					self.mode_stack.pop()
 				else:
-					if is_include_line(l2)
+					if is_include_line(l2):
 						tokens = shlex.split(l2)
 						self.rdf_lines.extend(self.lexically_include_file(tokens[1]))
 					self.rdf_lines.append(l)
