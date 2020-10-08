@@ -11,6 +11,7 @@ import pathlib
 from enum import Enum, auto
 from .locators import *
 from .dotdict import Dotdict
+from .recursive_file_includer import do_includes
 
 
 def showtriples(conn):
@@ -168,14 +169,13 @@ class Context:
 					self.on_complete_rdf_text(self.base_uri)
 					self.mode_stack.pop()
 				else:
-					if l2.startswith('@include'):
+					if is_include_line(l2)
 						tokens = shlex.split(l2)
 						self.rdf_lines.extend(self.lexically_include_file(tokens[1]))
 					self.rdf_lines.append(l)
 		return self.save_testcase(graph)
 
-	def lexically_include_file(self, path):
-		return open(path).readlines()
+
 
 	def save_testcase(self, graph):#, , unique_uri_generator):
 		uid = bn(self.conn, 'testcase')

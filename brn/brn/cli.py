@@ -69,7 +69,7 @@ def my_ag_connect():
 			port=port,
 			user=os.environ['SEMANTIC_DESKTOP_AGRAPH_USER'],
 			password=os.environ['SEMANTIC_DESKTOP_AGRAPH_PASS'],
-			clear=True
+			#clear=True
 			)
 	logging.getLogger(__name__).info(f'connected.')
 
@@ -170,7 +170,24 @@ def version():
 def run_testcases(profile, executable, iri):
 	with my_ag_connect() as conn:
 		if iri == None:
-			pass
+			'https://rdf.localhost/last_tau_testcases_parsed'
+		conn.getStatements(
+			contexts=[graph]
+			tripleIDs=True
+
+
+		# iri
+		# 	RDF.VALUE:
+				pointer
+		pointer
+		# 	RDF.VALUE:
+		# 		result
+		result
+		# 	'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph':
+		# 		graph
+		#
+
+
 	# 		#iri =statements = conn.getStatements(
 	# 	logging.getLogger(__name__).info(f': {iri}')
 	# 	for testcase in iterate_rdf_list(iri):
