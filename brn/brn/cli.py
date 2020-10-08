@@ -19,6 +19,11 @@ from franz.openrdf.connect import ag_connect
 from franz.openrdf.vocabulary.rdf import RDF
 import os
 from .sparql_helper import *
+import rdflib
+from pyld import jsonld
+import json
+
+
 
 
 class Info(object):
@@ -192,6 +197,7 @@ def run_testcases(profile, executable, iri):
 		r = select_one_result(conn, query)
 		graph = r['graph']
 
+		quads = []
 
 		with conn.getStatements(
 			contexts=[graph],
@@ -200,6 +206,13 @@ def run_testcases(profile, executable, iri):
 			statements.enableDuplicateFilter()
 			for statement in statements:
 				print(statement)
+				quads.append(statement)
+
+
+		print(jsonld.from_rdf({'@default':quads},{}))
+
+
+
 
 
 		# pointer
