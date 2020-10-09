@@ -66,7 +66,7 @@ def configure_logger(verbosity):
 	if verbosity > 0:
 		logging.getLogger(__name__).info(f"Logging severity filter level: {logging.getLogger().getEffectiveLevel()}")
 
-def my_ag_connect():
+def my_ag_connect(clear=False):
 	host=os.environ['SEMANTIC_DESKTOP_AGRAPH_HOST']
 	port=os.environ['SEMANTIC_DESKTOP_AGRAPH_PORT']
 	logging.getLogger(__name__).info(f'connecting to {host}:{port}...')
@@ -76,7 +76,7 @@ def my_ag_connect():
 			port=port,
 			user=os.environ['SEMANTIC_DESKTOP_AGRAPH_USER'],
 			password=os.environ['SEMANTIC_DESKTOP_AGRAPH_PASS'],
-			#clear=True
+			clear=clear
 			)
 	logging.getLogger(__name__).info(f'connected.')
 
@@ -89,7 +89,7 @@ def parse_tau_testcases(_: Info, main_directory):
 	logging.getLogger(__name__).info("scanning " + main_directory)
 	paths = find_all_files_recursively(AbsPath(main_directory))
 	logging.getLogger(__name__).info(f'found files: {paths}')
-	with my_ag_connect() as conn:
+	with my_ag_connect(clear=True) as conn:
 		# ok this will need some serious explaining/visualization
 		graph = bn(conn, 'graph')
 		uris = []
@@ -196,6 +196,7 @@ def run_testcases(profile, executable, iri):
 		query.setBinding('pointer', pointer)
 		r = select_one_result(conn, query)
 		graph = r['graph']
+		result = r['result']
 
 		quads = []
 
@@ -206,11 +207,22 @@ def run_testcases(profile, executable, iri):
 			statements.enableDuplicateFilter()
 			for statement in statements:
 				print(statement)
-				quads.append(statement)
+				quads.append(franz_quad_to_pyld(statement))
 
 
-		print(jsonld.from_rdf({'@default':quads},{}))
+		jld = jsonld.from_rdf({'@default':quads},{})
 
+		frame = {
+			"@context": {
+				"xsd": "http://www.w3.org/2001/XMLSchema#",
+				"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+				"rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+			},
+			#'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result'
+			'@id':franz_term_to_pyld(result)['value']
+		}
+
+		print(json.dumps(jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'}),indent=4))
 
 
 

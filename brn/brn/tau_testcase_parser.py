@@ -11,7 +11,7 @@ import pathlib
 from enum import Enum, auto
 from .locators import *
 from .dotdict import Dotdict
-from .recursive_file_includer import do_includes
+from .recursive_file_includer import *
 
 
 def showtriples(conn):
