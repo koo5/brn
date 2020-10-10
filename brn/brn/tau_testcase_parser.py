@@ -48,34 +48,65 @@ def is_url(x):
 		return True
 
 def bn(conn, suffix = ''):
+	"""this is kind of the worst of both worlds. It requires the roundtrip to obtain an unused bnode id from the triplestore (although those are fetched in bulk and cached - see ValueFactory.BLANK_NODE_AMOUNT).
+	and it returns an uri, so, lists will not be serialized in a nice way.
+	"""
 	if suffix != '':
 		suffix = '_' + suffix
 	return 'https://rdf.localhost/bn/'+conn.createBNode().id[2:] + suffix
 
 
+def tell_if_is_last_element(x):
+	for i, j in enumerate(x):
+		yield j, (i == (len(x) - 1))
+
+
+# def add_list(l, graph):
+# 	"""
+# 	must be a list of uris. It would be helpful to start using some URI/Bnode classes here, perhaps the ones from the agraph package.
+# 	"""
+# 	bn0 = bn('cell')
+# 	bn = bn0
+# 	q = []
+# 	for i, is_last in tell_if_is_last_element(l):
+# 		q.append('<'+bn+'> rdf:first <' + i + '>.')
+# 		if is_last:
+# 			bn_next = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+# 		else
+# 			bn_next = bn('cell')
+# 		bn0 = bn('cell')
+# 		q.append('<'+bn+'> rdf:rest <' + bn_next + '>.')
+# 		bn = bn_next
+# 	insert = """INSERT DATA
+# 	{
+# 		GRAPH <"""+graph+""">
+# 		{
+# 			""" + "\n".join(q) + """
+# 		}
+# 	}"""
+# 	conn.
+# 	return bn0
+
+#def _to_dict_recursively(ns, s, graph):
 def _to_dict_recursively(ns, s):
 	"""this problem wouldn't exist in js. That is, dict keys can be written with dot notation, in js, so no need for Dotdict."""
 	if isinstance(s, Dotdict):
 		s = s._dict
-
 	#This problem would exist, because the keys need to conform to some basic IRI pattern to be accepted by json-ld. I think it might be better if triplestores etc accepted strings for predicates. But since we are here already, we might as well come up with some good namespace here. It will be kinda ridiculous that there might be predicates in that namespace that mean different things in different places, but hey, that's json.
-
 	if isinstance(s, dict):
 		r = {}
 		for k,v in s.items():
 			r[ns + ':' + k] = _to_dict_recursively(ns, v)
 		return r
-
 	#just a required, mechanical translation into json-ld. A json list, in json-ld, means a set. Actually, that's really silly, because it complicates going from json to rdf, and is only useful for representing (complex-beyond-json) rdf in json-ld, right? which is something nobody really cares about, you can pick any other serialization, right? Do we really care about dumbing things back down into json? (i dont, right now)
-
+	#---
+	#well, another issue turned up, agraph always stores list triples in default graph, no matter what.
 	elif isinstance(s, list):
 		r = []
 		for i in s:
 			r.append(_to_dict_recursively(ns, i))
 		return {'@list':r}
-
 	#custom types like this might fare better in js too, but idk yet..
-
 	elif isinstance(s, pathlib.Path):
 		return str(s)
 	else:
@@ -182,13 +213,15 @@ class Context:
 		#uid = 'https://rdf.localhost/bn/' + uid.id
 		d0 = _to_dict_recursively('xx', self.data)
 		d0['@id'] = uid
-		d = {
-			"@id": graph,
-  			"@graph":[d0]
-  		}
+		# d = {
+		# 	"@id": graph,
+  		# 	"@graph":[d0]
+  		# }
+		d = d0
 		logging.getLogger(__name__).info(f'#saving: {json.dumps(d,indent=2)}')
 		logging.getLogger(__name__).info(f'#saving: {d}')
-		self.conn.addData(d)
+		#fixme:
+		self.conn.addData(d, context='<'+graph+'>')
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
 		#showtriples(self.conn)
 		return uid

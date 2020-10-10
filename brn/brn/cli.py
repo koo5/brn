@@ -106,16 +106,10 @@ def parse_tau_testcases(_: Info, main_directory):
 		# <list> <rdf:rest> xxx <graph>...
 		result = bn(conn, 'result')
 		conn.addData({
-			"@id": graph,
-  			"@graph":
-  			[
-	  			{
 					'@id':result,
 					'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result',
 					RDF.VALUE:{'@list':uris}
-				}
-			]
-		})
+			}, context='<'+graph+'>')
 
 		logging.getLogger(__name__).info(f'#saved result IRI: {result} with list:{uris}')
 
