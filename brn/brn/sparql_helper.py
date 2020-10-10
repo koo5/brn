@@ -25,9 +25,9 @@ def select_one_result(conn, query):
 
 def franz_term_to_pyld(ft):
 	if isinstance(ft, franz.openrdf.model.URI):
-		return 	{'type': 'IRI', 'value': ft.value}
+		return {'type': 'IRI', 'value': ft.value}
 	if isinstance(ft, franz.openrdf.model.BNode):
-		return 	{'type': 'blank node', 'value': ft.id}
+		return {'type': 'blank node', 'value': '_:' + ft.id}
 	if isinstance(ft, franz.openrdf.model.literal.Literal):
 		r = {'type': 'literal', 'value': ft.label}
 		r['language'] = ft.language

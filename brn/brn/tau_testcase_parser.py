@@ -275,3 +275,6 @@ class Context:
 			if self.last_textcase == None:
 				raise err
 			self.last_textcase.shouldbeerror_text = text
+
+
+# todo: could we replace the tau format with https://github.com/Keats/scl ?

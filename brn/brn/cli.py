@@ -163,6 +163,9 @@ def version():
 
 
 
+
+
+
 @cli.command()
 @click.argument('profile', nargs=1, type=str, required=True)
 @click.argument('executable', nargs=1, type=click.Path(readable=True, exists=True, dir_okay=False), required=False)
@@ -170,43 +173,24 @@ def version():
 
 def run_testcases(profile, executable, iri):
 	with my_ag_connect() as conn:
-
-		conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')
-		conn.setNamespace('localhost', 'https://rdf.localhost/')
-
+		ensure_common_namespaces_are_defined(conn)
 		if iri == None:
 			pointer = select_one_result_and_one_binding(conn, "localhost:last_tau_testcases_parsed rdf:value ?pointer.")
 		else:
 			pointer = '<'+iri+'>'
-
-		# what if the data is not in a graph? maybe we'll be able to CONSTRUCT one?
-
-		query = conn.prepareTupleQuery(query="""
-			SELECT * WHERE {
-			   ?pointer rdf:value ?result .
-			   ?pointer rdf2:data_is_in_graph ?graph .
-			}"""
-		)
-		query.setBinding('pointer', pointer)
-		r = select_one_result(conn, query)
-		graph = r['graph']
-		result = r['result']
-
-		quads = []
-
-		with conn.getStatements(
-			contexts=[graph],
-			tripleIDs=True
-		) as statements:
-			statements.enableDuplicateFilter()
-			for statement in statements:
-				print(statement)
-				quads.append(franz_quad_to_pyld(statement))
-
-
+		graph, result = read_pointer(conn,pointer)
+		quads = read_quads_from_context(conn,graph)
 		jld = jsonld.from_rdf({'@default':quads},{})
 
-		frame = {
+		data = frame_result(jld,result)
+
+		data
+		# now the meat
+		#
+		#
+
+def frame_result(jld, result):
+	frame = {
 			"@context": {
 				"xsd": "http://www.w3.org/2001/XMLSchema#",
 				"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -215,19 +199,42 @@ def run_testcases(profile, executable, iri):
 			#'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result'
 			'@id':franz_term_to_pyld(result)['value']
 		}
+ data = jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'})
+ print(json.dumps(data,indent=4))
+ return data
 
-		print(json.dumps(jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'}),indent=4))
+def read_quads_from_context(conn, graph):
+	quads = []
+	with conn.getStatements(
+			contexts=[graph],
+			tripleIDs=True
+		) as statements:
+			statements.enableDuplicateFilter()
+			for statement in statements:
+				print(statement)
+				quads.append(franz_quad_to_pyld(statement))
+	return quads
+
+def read_pointer(conn, pointer):
+	# what if the data is not in a graph? maybe we'll be able to CONSTRUCT one? todo.
+	with conn.prepareTupleQuery(query="""
+			SELECT * WHERE {
+			   ?pointer rdf:value ?result .
+			   # data_is_in_graph should eventually be optional.
+			   ?pointer rdf2:data_is_in_graph ?graph .
+			}"""
+		) as query:
+			query.setBinding('pointer', pointer)
+			r = select_one_result(conn, query)
+			graph = r['graph']
+			result = r['result']
+			return graph, result
+
+def ensure_common_namespaces_are_defined(conn):
+	conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')
+	conn.setNamespace('localhost', 'https://rdf.localhost/')
 
 
-
-
-		# pointer
-		# 	RDF.VALUE:
-		# 		result
-		# result
-		# 	'https://rdf.lodgeit.net.au/rdf2/data_is_in_graph':
-		# 		graph
-		#
 
 
 	# 		#iri =statements = conn.getStatements(
