@@ -183,11 +183,26 @@ def run_testcases(profile, executable, iri):
 		jld = jsonld.from_rdf({'@default':quads},{})
 
 		data = frame_result(jld,result)
+		testcases=data['@graph'][0]['rdf:value']['@list']
+		for tc in testcases:
+			if profile == 'pyco3':
+				if executable == None:
+					executable = 'pyco3'
+			queries = tc['xx:queries']['@list']
+			for q in queries:
+				for 
 
-		data
-		# now the meat
-		#
-		#
+
+	# 			subprocess.spawn([executable, '--task', task_uri])
+	# 			while True:
+	# 				q(task_uri, has_processing, X),
+	# 				q(X, has_status, S),
+	# 				if S == failed:
+	# 					q(X has_error E)
+	# 				else:
+	# 					if S == succeded:
+	# 						q(X, has_results, Results_list),
+	# 						rdf_list_length(Results_list)
 
 def frame_result(jld, result):
 	frame = {
@@ -199,9 +214,9 @@ def frame_result(jld, result):
 			#'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result'
 			'@id':franz_term_to_pyld(result)['value']
 		}
- data = jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'})
- print(json.dumps(data,indent=4))
- return data
+	data = jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'})
+	print(json.dumps(data,indent=4))
+	return data
 
 def read_quads_from_context(conn, graph):
 	quads = []
@@ -217,37 +232,20 @@ def read_quads_from_context(conn, graph):
 
 def read_pointer(conn, pointer):
 	# what if the data is not in a graph? maybe we'll be able to CONSTRUCT one? todo.
-	with conn.prepareTupleQuery(query="""
+	query = conn.prepareTupleQuery(query="""
 			SELECT * WHERE {
 			   ?pointer rdf:value ?result .
 			   # data_is_in_graph should eventually be optional.
 			   ?pointer rdf2:data_is_in_graph ?graph .
-			}"""
-		) as query:
-			query.setBinding('pointer', pointer)
-			r = select_one_result(conn, query)
-			graph = r['graph']
-			result = r['result']
-			return graph, result
+			}""")
+	query.setBinding('pointer', pointer)
+	r = select_one_result(conn, query)
+	graph = r['graph']
+	result = r['result']
+	return graph, result
 
 def ensure_common_namespaces_are_defined(conn):
 	conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')
 	conn.setNamespace('localhost', 'https://rdf.localhost/')
 
 
-
-
-	# 		#iri =statements = conn.getStatements(
-	# 	logging.getLogger(__name__).info(f': {iri}')
-	# 	for testcase in iterate_rdf_list(iri):
-	# 		if profile == 'pyco3':
-	# 			subprocess.spawn([executable, '--task', task_uri])
-	# 			while True:
-	# 				q(task_uri, has_processing, X),
-	# 				q(X, has_status, S),
-	# 				if S == failed:
-	# 					q(X has_error E)
-	# 				else:
-	# 					if S == succeded:
-	# 						q(X, has_results, Results_list),
-	# 						rdf_list_length(Results_list)
