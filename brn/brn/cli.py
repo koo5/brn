@@ -8,7 +8,7 @@ This is the entry point for the command-line interface (CLI) application.
 """
 
 import logging
-import click
+import click, subprocess
 
 from .version import __version__
 
@@ -167,8 +167,9 @@ def version():
 
 
 @cli.command()
-@click.argument('profile', nargs=1, type=str, required=True)
-@click.argument('executable', nargs=1, type=click.Path(readable=True, exists=True, dir_okay=False), required=False)
+
+@click.option('--profile', '-p', type=str)
+@click.option('--executable', type=click.Path(readable=True, exists=True, dir_okay=False))
 @click.argument('IRI', nargs=1, type=str, required=False)
 
 def run_testcases(profile, executable, iri):
@@ -188,12 +189,14 @@ def run_testcases(profile, executable, iri):
 			if profile == 'pyco3':
 				if executable == None:
 					executable = 'pyco3'
-			queries = tc['xx:queries']['@list']
+			queries = tc['tc:queries']['@list']
 			for q in queries:
-				for 
+				query_pointer_uri = construct_pointer(conn, q, graph)
+				#query_pointer_uri is a single uri, and you can read the default graph to figure out the value it points to, and what the relevant graph is
+				args = [executable, '--task', query_pointer_uri]
+				logging.getLogger(__name__).info(f'#spawning: {args}')
+				subprocess.run(args)
 
-
-	# 			subprocess.spawn([executable, '--task', task_uri])
 	# 			while True:
 	# 				q(task_uri, has_processing, X),
 	# 				q(X, has_status, S),
@@ -209,7 +212,8 @@ def frame_result(jld, result):
 			"@context": {
 				"xsd": "http://www.w3.org/2001/XMLSchema#",
 				"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-				"rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+				"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+				'tc':'https://rdf.lodgeit.net.au/testcase/'
 			},
 			#'@type':'https://rdf.lodgeit.net.au/tau_testcase_parser/Result'
 			'@id':franz_term_to_pyld(result)['value']
@@ -243,6 +247,19 @@ def read_pointer(conn, pointer):
 	graph = r['graph']
 	result = r['result']
 	return graph, result
+
+pointer_namespaces = {
+	'rdf':RDF.NAMESPACE,
+	'rdf2':'https://rdf.lodgeit.net.au/rdf2/'}
+
+def construct_pointer(conn, iri, graph):
+	id = bn(conn, 'pointer')
+	conn.addData({
+		'@context':pointer_namespaces,
+		'@id':id,
+		'rdf:value': {'@id':iri},
+		'rdf2:data_is_in_graph': {'@id':graph}})
+	return id
 
 def ensure_common_namespaces_are_defined(conn):
 	conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')

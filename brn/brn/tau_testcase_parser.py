@@ -87,8 +87,10 @@ def tell_if_is_last_element(x):
 # 	conn.
 # 	return bn0
 
-#def _to_dict_recursively(ns, s, graph):
-def _to_dict_recursively(ns, s):
+
+
+# todo replace ns with @vocab in @context
+def _to_dict_recursively(s):
 	"""this problem wouldn't exist in js. That is, dict keys can be written with dot notation, in js, so no need for Dotdict."""
 	if isinstance(s, Dotdict):
 		s = s._dict
@@ -96,7 +98,7 @@ def _to_dict_recursively(ns, s):
 	if isinstance(s, dict):
 		r = {}
 		for k,v in s.items():
-			r[ns + ':' + k] = _to_dict_recursively(ns, v)
+			r[k] = _to_dict_recursively(v)
 		return r
 	#just a required, mechanical translation into json-ld. A json list, in json-ld, means a set. Actually, that's really silly, because it complicates going from json to rdf, and is only useful for representing (complex-beyond-json) rdf in json-ld, right? which is something nobody really cares about, you can pick any other serialization, right? Do we really care about dumbing things back down into json? (i dont, right now)
 	#---
@@ -104,7 +106,7 @@ def _to_dict_recursively(ns, s):
 	elif isinstance(s, list):
 		r = []
 		for i in s:
-			r.append(_to_dict_recursively(ns, i))
+			r.append(_to_dict_recursively(i))
 		return {'@list':r}
 	#custom types like this might fare better in js too, but idk yet..
 	elif isinstance(s, pathlib.Path):
@@ -130,7 +132,7 @@ def parse_testcase(conn, p: Path, graph):
 	logging.getLogger(__name__).info(f'parsing {fn}')
 	assert isinstance(fn, pathlib.PosixPath)
 	with fn.open() as f:
-		c = Context(f, fn, conn)
+		c = Context(fn, f, fn, conn)
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
 		return c.interpret(graph)
@@ -142,9 +144,10 @@ class Context:
 	a Context is something like a current input channel. You could invoke the parser/runner with a bunch of command line arguments. A context would be created to parse those arguments. One of them is a .tau file, so a nested context would be created for it, and so on. Irc/interactive input is also considered. None of this is implemented in this version though, and i don't think i'll bother with it so i should probably change the design here...
 	"""
 
-	def __init__(self, input, base_uri, conn):
+	def __init__(self, fn, input, base_uri, conn):
 		#format = "";
 		#base = "";
+		self.fn = fn
 		self.conn = conn
 		self.input = input
 		self.base_uri = base_uri
@@ -211,16 +214,12 @@ class Context:
 	def save_testcase(self, graph):#, , unique_uri_generator):
 		uid = bn(self.conn, 'testcase')
 		#uid = 'https://rdf.localhost/bn/' + uid.id
-		d0 = _to_dict_recursively('xx', self.data)
-		d0['@id'] = uid
-		# d = {
-		# 	"@id": graph,
-  		# 	"@graph":[d0]
-  		# }
-		d = d0
+		d = _to_dict_recursively(self.data)
+		d['@id'] = uid
+		d['@context'] = {'@vocab':'https://rdf.lodgeit.net.au/testcase/'}
 		logging.getLogger(__name__).info(f'#saving: {json.dumps(d,indent=2)}')
 		logging.getLogger(__name__).info(f'#saving: {d}')
-		#fixme:
+		#fixme, use agraph IRI term or something:
 		self.conn.addData(d, context='<'+graph+'>')
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')
 		#showtriples(self.conn)
@@ -264,9 +263,11 @@ class Context:
 			tc = Dotdict()
 			self.data.queries.append(tc)
 			self.last_textcase = tc
-			tc.type = 'query'
+			tc['@id'] = bn(self.conn, 'testcase')
+			tc.type = {'@id':'query'}
 			tc.kb_texts = self.kb_texts
 			tc.query_text = text
+			tc.source_file = self.fn
 		if self.mode == Mode.SHOULDBE:
 			if self.last_textcase == None:
 				raise err
