@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 """
@@ -8,7 +8,7 @@ This is the entry point for the command-line interface (CLI) application.
 """
 
 import logging
-import click, subprocess
+import click, subprocess, shlex
 
 from .version import __version__
 
@@ -19,7 +19,7 @@ from franz.openrdf.connect import ag_connect
 from franz.openrdf.vocabulary.rdf import RDF
 import os
 from .sparql_helper import *
-import rdflib
+#import rdflib
 from pyld import jsonld
 import json
 
@@ -186,15 +186,17 @@ def run_testcases(profile, executable, iri):
 		data = frame_result(jld,result)
 		testcases=data['@graph'][0]['rdf:value']['@list']
 		for tc in testcases:
-			if profile == 'pyco3':
-				if executable == None:
-					executable = 'pyco3'
 			queries = tc['tc:queries']['@list']
 			for q in queries:
 				query_pointer_uri = construct_pointer(conn, q, graph)
 				#query_pointer_uri is a single uri, and you can read the default graph to figure out the value it points to, and what the relevant graph is
-				args = [executable, '--task', query_pointer_uri]
-				logging.getLogger(__name__).info(f'#spawning: {args}')
+
+				if profile == 'pyco3':
+					if executable == None:
+						executable = 'pyco3'
+				#args = [executable, f"-g perform_task('{query_pointer_uri}')"]
+				args = [executable, '-g', 'main', query_pointer_uri]
+				logging.getLogger(__name__).info(f'#spawning: {shlex.join(args)}')
 				subprocess.run(args)
 
 	# 			while True:
