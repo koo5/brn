@@ -1,1 +1,0 @@
-program 1 doesn't have to worry about where to save temporary files and what arguments to invoke program 2 with, the indirection is gone, is just asserts a description of the task at hand, and the other program just grabs it and runs
