@@ -23,6 +23,7 @@ from .sparql_helper import *
 from pyld import jsonld
 import json
 
+import franz.openrdf.model
 
 
 
@@ -68,7 +69,7 @@ def configure_logger(verbosity):
 		level=lvl
 	)
 
-	formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+	formatter = logging.Formatter('%(asctime)s %(message)s')
 	formatter.default_time_format = '%S'
 	formatter.default_msec_format = '%s.%03d'
 	root_logger = logging.getLogger()
@@ -158,6 +159,8 @@ def parse_tau_testcases(_: Info, main_directory):
 		})
 
 		# <last_tau_testcases_parsed> <rdf:value> <pointer> <default graph>
+		# i guess it's silly to use agraph's json-ld logic, it's buggy anyway, and if we just did the conversion of this object into the triple ourselves, we could have a replaceTriple() naturally.
+		conn.remove(franz.openrdf.model.URI('https://rdf.localhost/last_tau_testcases_parsed'), RDF.VALUE, None)
 		conn.addData({
 			'@id':'https://rdf.localhost/last_tau_testcases_parsed',
 			RDF.VALUE:{'@id':pointer}
@@ -187,9 +190,10 @@ def version():
 @click.option('--profile', '-p', type=str)
 @click.option('--executable', type=click.Path(readable=True, exists=True, dir_okay=False))
 @click.option('--halt-on-error', type=bool, default=False)
+@click.option('--limit-testcase-count', type=int, default=None)
 @click.argument('IRI', nargs=1, type=str, required=False)
 
-def run_testcases(profile, executable, halt_on_error, iri):
+def run_testcases(profile, executable, halt_on_error, limit_testcase_count, iri):
 	with my_ag_connect() as conn:
 		ensure_common_namespaces_are_defined(conn)
 		if iri == None:
@@ -202,7 +206,9 @@ def run_testcases(profile, executable, halt_on_error, iri):
 
 		data = frame_result(jld,result)
 		testcases=data['@graph'][0]['rdf:value']['@list']
-		for tc in testcases:
+		for tc_idx, tc in enumerate(testcases):
+			if tc_idx == limit_testcase_count:
+				break
 			queries = tc['tc:queries']['@list']
 			for q in queries:
 				query_pointer_uri = construct_pointer(conn, q, graph)

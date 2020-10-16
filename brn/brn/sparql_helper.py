@@ -10,11 +10,11 @@ def select_one_result_and_one_binding(conn, query_str):
 	query = conn.prepareTupleQuery(query=query_str2)
 	return select_one_result(conn, query)[0]
 
-def select_one_result(conn, query, query_str):
+def select_one_result(conn, query):
 	with query.evaluate() as results:
 		results_list = list(results)
 	if len(results_list) != 1:
-		raise Exception(f'expected one result. query: {query_str}\n,got:{results_list}')
+		raise Exception(f'expected one result. query: {query.queryString}\n,got:{results_list}')
 	return results_list[0]
 
 
