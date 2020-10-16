@@ -183,7 +183,7 @@ class Context:
 		self.settings[k] = v
 
 	def print_setting(self, k,v):
-		logging.getLogger(__name__).info(f'#{k} = {human_friendly_setting_value(v)}')
+		logging.getLogger(__name__).debug(f'#{k} = {human_friendly_setting_value(v)}')
 
 	def interpret(self, graph):
 		for l in self.input:
@@ -226,8 +226,8 @@ class Context:
 		d = _to_dict_recursively(self.data)
 		d['@id'] = uid
 		d['@context'] = {'@vocab':'https://rdf.lodgeit.net.au/testcase/'}
-		logging.getLogger(__name__).info(f'#saving: {json.dumps(d,indent=2)}')
-		logging.getLogger(__name__).info(f'#saving: {d}')
+		logging.getLogger(__name__).debug(f'#saving: {json.dumps(d,indent=2)}')
+		#logging.getLogger(__name__).info(f'#saving: {d}')
 		#fixme, use agraph IRI term or something:
 		self.conn.addData(d, context='<'+graph+'>')
 		logging.getLogger(__name__).info(f'#saved testcase IRI: {uid}')

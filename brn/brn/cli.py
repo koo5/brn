@@ -61,9 +61,22 @@ def configure_logger(verbosity):
 		logging.DEBUG,
 		logging.NOTSET # NOTSET should be the last
 	]  #: a mapping of `verbosity` option counts to logging levels.
+
+	lvl = element_by_index_upper_clipped(VERBOSITY_to_SEVERITY, verbosity)
+
 	logging.basicConfig(
-		level=element_by_index_upper_clipped(VERBOSITY_to_SEVERITY, verbosity)
+		level=lvl
 	)
+
+	formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+	formatter.default_time_format = '%S'
+	formatter.default_msec_format = '%s.%03d'
+	root_logger = logging.getLogger()
+	#root_logger.setLevel(lvl)
+	root_handler = root_logger.handlers[0]
+	root_handler.setFormatter(formatter)
+	#logging.getLogger(__name__).handlers[0].setFormatter(formatter)
+
 	if verbosity > 0:
 		logging.getLogger(__name__).info(f"Logging severity filter level: {logging.getLogger().getEffectiveLevel()}")
 
@@ -90,7 +103,8 @@ def parse_tau_testcases(_: Info, main_directory):
 	logging.getLogger(__name__).info("scanning " + main_directory)
 	paths = find_all_files_recursively(AbsPath(main_directory))
 	logging.getLogger(__name__).info(f'found files: {paths}')
-	with my_ag_connect(clear=True) as conn:
+	#with my_ag_connect(clear=True) as conn:
+	with my_ag_connect() as conn:
 		# ok this will need some serious explaining/visualization
 		graph = bn(conn, 'graph')
 		uris = []
@@ -113,6 +127,7 @@ def parse_tau_testcases(_: Info, main_directory):
 			}, context='<'+graph+'>')
 
 		logging.getLogger(__name__).info(f'#saved result IRI: {result} with list:{uris}')
+		logging.getLogger(__name__).info(f'#note:due to agraph bug, the list items appear in reverse order here^')
 
 		# uris = [
 		# 	{'@id':'http://yy.yy','http://yy.vvv':'a'},
