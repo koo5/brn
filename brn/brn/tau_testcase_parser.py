@@ -6,7 +6,7 @@ and here: https://github.com/koo5/univar/blob/master/pyin/tau2.py
 
 
 import logging,json
-import shlex
+import shlex, stat
 import pathlib
 from enum import Enum, auto
 from .locators import *
@@ -23,7 +23,8 @@ def showtriples(conn):
 def find_all_files_recursively(path: Path):
 	paths = []
 	for p in pathlib.Path(path.value).rglob('*'):
-		if not p.is_dir():
+
+		if stat.S_ISREG(os.lstat(p)[stat.ST_MODE]) and not p.is_dir():
 			paths.append(p)
 	return [ Path(x) for x in sorted(paths) ]
 
@@ -136,6 +137,14 @@ def parse_testcase(conn, p: Path, graph):
 		c.set_mode(Mode.COMMANDS)
 		c.set_setting('result_limit', 123)
 		return c.interpret(graph)
+
+def text_with_line_numbers(text):
+	r = []
+	for lineno,line in enumerate(text.split('\n')):
+		r.append(str(lineno+1) + ':'+ line)
+	return '\n'.join(r)
+
+
 
 
 
@@ -253,12 +262,16 @@ class Context:
 			else:
 				raise ParsingError(f'unrecognized token: {token.__repr__()}')
 
+	def n3_text(self,text,base_uri):
+		text = ''.join(text)
+		x = text_with_line_numbers(text)
+		return Dotdict({'text':text,'base_uri':base_uri,'text_with_line_numbers':x})
+
 	def on_complete_rdf_text(self,base_uri):
-		text = '\n'.join(self.rdf_lines)
+		full_n3_text = self.full_n3_text(base_uri)
 		self.rdf_lines = []
-		logging.getLogger(__name__).info(f'#on_complete_rdf_text:\n{text}')
 		if self.mode == Mode.KB:
-			self.kb_texts.append(Dotdict({'text':text,'base_uri':base_uri}))
+			self.kb_texts.append(full_n3_text)
 		if self.mode == Mode.QUERY:
 			tc = Dotdict()
 			self.data.queries.append(tc)
@@ -266,16 +279,19 @@ class Context:
 			tc['@id'] = bn(self.conn, 'testcase')
 			tc.type = {'@id':'query'}
 			tc.kb_texts = self.kb_texts
-			tc.query_text = text
+			tc.query_text = full_n3_text
 			tc.source_file = self.fn
 		if self.mode == Mode.SHOULDBE:
 			if self.last_textcase == None:
 				raise err
-			self.last_textcase.shouldbe_text = text
+			self.last_textcase.shouldbe_text = full_n3_text
 		if self.mode == Mode.SHOULDBEERROR:
 			if self.last_textcase == None:
 				raise err
-			self.last_textcase.shouldbeerror_text = text
+			self.last_textcase.shouldbeerror_text = ''.join(self.rdf_lines)
+
+	def full_n3_text(self,base_uri):
+		return self.n3_text(self.common_text+self.rdf_lines,base_uri)
 
 
 # todo: could we replace the tau format with https://github.com/Keats/scl ?

@@ -50,6 +50,7 @@ def cli(info: Info, verbose: int):
 
 
 def configure_logger(verbosity):
+	logging.getLogger("urllib3").setLevel(logging.WARNING)
 	"""
 	user sets verbosity, with how many -v's they invoke the command with, but python logging is based on filtering by severity level.
 	the more verbose, the less severity required of a log message to display it.
@@ -170,9 +171,10 @@ def version():
 
 @click.option('--profile', '-p', type=str)
 @click.option('--executable', type=click.Path(readable=True, exists=True, dir_okay=False))
+@click.option('--halt-on-error', type=bool, default=False)
 @click.argument('IRI', nargs=1, type=str, required=False)
 
-def run_testcases(profile, executable, iri):
+def run_testcases(profile, executable, halt_on_error, iri):
 	with my_ag_connect() as conn:
 		ensure_common_namespaces_are_defined(conn)
 		if iri == None:
@@ -194,10 +196,16 @@ def run_testcases(profile, executable, iri):
 				if profile == 'pyco3':
 					if executable == None:
 						executable = 'pyco3'
-				#args = [executable, f"-g perform_task('{query_pointer_uri}')"]
-				args = [executable, '-g', 'main', query_pointer_uri]
+
+				args = [executable, '-g', 'main', '--', '--task', query_pointer_uri]
 				logging.getLogger(__name__).info(f'#spawning: {shlex.join(args)}')
-				subprocess.run(args)
+				cmpl = subprocess.run(args)
+
+				if halt_on_error:
+					if cmpl.returncode != 0:
+						exit()
+
+
 
 	# 			while True:
 	# 				q(task_uri, has_processing, X),
@@ -221,7 +229,7 @@ def frame_result(jld, result):
 			'@id':franz_term_to_pyld(result)['value']
 		}
 	data = jsonld.frame(jld, frame, {'omitGraph':False,'embed':'@always'})
-	print(json.dumps(data,indent=4))
+	#print(json.dumps(data,indent=4))
 	return data
 
 def read_quads_from_context(conn, graph):
@@ -232,7 +240,7 @@ def read_quads_from_context(conn, graph):
 		) as statements:
 			statements.enableDuplicateFilter()
 			for statement in statements:
-				print(statement)
+				#print(statement)
 				quads.append(franz_quad_to_pyld(statement))
 	return quads
 
