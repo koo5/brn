@@ -1,5 +1,5 @@
 """
-Parse a "tau testcase".
+Parse a "tau" testcase file.
 Previously implemented here: https://github.com/koo5/univar/blob/master/tau.cpp
 and here: https://github.com/koo5/univar/blob/master/pyin/tau2.py
 """
@@ -12,13 +12,13 @@ from enum import Enum, auto
 from .locators import *
 from .dotdict import Dotdict
 from .recursive_file_includer import *
+from .sparql_helper import bn
 
-
-def showtriples(conn):
-	statements = conn.getStatements()
-	with statements:
-		for statement in statements:
-			logging.getLogger(__name__).info(f'quad({statement})')
+# def showtriples(conn):
+# 	statements = conn.getStatements()
+# 	with statements:
+# 		for statement in statements:
+# 			logging.getLogger(__name__).info(f'quad({statement})')
 
 def find_all_files_recursively(path: Path):
 	paths = []
@@ -29,38 +29,21 @@ def find_all_files_recursively(path: Path):
 	return [ Path(x) for x in sorted(paths) ]
 
 
-def element_by_index_upper_clipped(array, index):
-	if len(array) > index:
-		return array[index]
-	else:
-		return array[-1]
-
 def human_friendly_setting_value(x):
 	try:
 		return x.name
 	except:
 		return x
 
-
-def is_url(x):
-	if x.startswith('http://'):
-		return True
-	if x.startswith('file://'):
-		return True
-
-def bn(conn, suffix = ''):
-	"""this is kind of the worst of both worlds. It requires the roundtrip to obtain an unused bnode id from the triplestore (although those are fetched in bulk and cached - see ValueFactory.BLANK_NODE_AMOUNT).
-	and it returns an uri, so, lists will not be serialized in a nice way.
-	"""
-	if suffix != '':
-		suffix = '_' + suffix
-	return 'https://rdf.localhost/bn/'+conn.createBNode().id[2:] + suffix
-
-
 def tell_if_is_last_element(x):
 	for i, j in enumerate(x):
 		yield j, (i == (len(x) - 1))
 
+def element_by_index_upper_clipped(array, index):
+	if len(array) > index:
+		return array[index]
+	else:
+		return array[-1]
 
 # def add_list(l, graph):
 # 	"""
@@ -90,7 +73,6 @@ def tell_if_is_last_element(x):
 
 
 
-# todo replace ns with @vocab in @context
 def _to_dict_recursively(s):
 	"""this problem wouldn't exist in js. That is, dict keys can be written with dot notation, in js, so no need for Dotdict."""
 	if isinstance(s, Dotdict):
@@ -119,6 +101,7 @@ def _to_dict_recursively(s):
 class ParsingError(Exception):
 	pass
 
+
 class Mode(Enum):
 	COMMANDS = auto()
 	KB = auto()
@@ -143,8 +126,6 @@ def text_with_line_numbers(text):
 	for lineno,line in enumerate(text.split('\n')):
 		r.append(str(lineno+1) + ':'+ line)
 	return '\n'.join(r)
-
-
 
 
 
