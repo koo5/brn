@@ -1,0 +1,23 @@
+@prefix : <#>.
+
+kb
+
+_:bn1 :a :set. 
+
+fin.
+
+kb
+
+_:bn1 :a :not-set. 
+
+fin.
+
+query
+
+fin.
+
+shouldbeerror
+
+fin.
+
+thatsall

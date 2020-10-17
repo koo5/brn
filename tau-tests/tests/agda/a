@@ -1,0 +1,17 @@
+@prefix : <#>.
+
+kb
+
+:bool :a :set. 
+
+fin.
+
+query
+
+fin.
+
+shouldbeerror
+
+fin.
+
+thatsall

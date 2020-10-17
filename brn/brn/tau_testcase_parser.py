@@ -20,11 +20,20 @@ from .sparql_helper import bn
 # 		for statement in statements:
 # 			logging.getLogger(__name__).info(f'quad({statement})')
 
-def find_all_files_recursively(path: Path):
-	paths = []
-	for p in pathlib.Path(path.value).rglob('*'):
+def is_file(p):
+	p = pathlib.Path(p)
+	return stat.S_ISREG(os.lstat(p)[stat.ST_MODE]) and not p.is_dir()
 
-		if stat.S_ISREG(os.lstat(p)[stat.ST_MODE]) and not p.is_dir():
+def find_all_files_recursively(path: Path):
+
+	path.value = pathlib.Path(path.value)
+
+	paths = []
+
+	if is_file(path.value):
+		paths.append(path.value)
+	for p in path.value.rglob('*'):
+		if is_file(p):
 			paths.append(p)
 	return [ Path(x) for x in sorted(paths) ]
 

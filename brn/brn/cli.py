@@ -67,8 +67,12 @@ def version():
 	click.echo(click.style(f"{__version__}", bold=True))
 
 
+file_formats_info = """
+you can specify the rdf format with the --format processing directive
+"""
 
-@cli.command()
+
+@cli.command(help='hh')
 @click.option('--profile', '-p', type=str)
 @click.option('--executable', type=click.Path(readable=True, exists=True, dir_okay=False))
 @click.option('--halt-on-error', type=bool, default=False)
@@ -77,7 +81,6 @@ def version():
 @click.pass_context
 def run_testcases(ctx, profile, executable, halt_on_error, limit_testcase_count, tau_files):
 	iri = ctx.invoke(parse_tau_testcases, tau_files=tau_files)
-
 	ctx.invoke(run_testcases2, profile=profile, executable=executable, halt_on_error=halt_on_error, limit_testcase_count=limit_testcase_count, iri=iri)
 
 
@@ -98,7 +101,7 @@ def parse_tau_testcases(tau_files):
 	"""Parse tau testcases in all subdirectories of main_directory.
 	main_directory is probably ../tau-tests/tests/ ."""
 	logging.getLogger(__name__).info("scanning " + tau_files)
-	paths = find_all_files_recursively(AbsPath(tau_files))
+	paths = find_all_files_recursively(Path(tau_files))
 	logging.getLogger(__name__).info(f'found files: {paths}')
 
 	conn = my_ag_conn()
