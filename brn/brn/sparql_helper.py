@@ -7,6 +7,9 @@ from franz.openrdf.vocabulary.rdf import RDF
 from pyld import jsonld
 
 
+
+conn = None
+
 pointer_namespaces = {
 	'rdf':RDF.NAMESPACE,
 	'rdf2':'https://rdf.lodgeit.net.au/rdf2/'}
@@ -14,9 +17,6 @@ pointer_namespaces = {
 def ensure_common_namespaces_are_defined(conn):
 	conn.setNamespace('rdf2', 'https://rdf.lodgeit.net.au/rdf2/')
 	conn.setNamespace('localhost', 'https://rdf.localhost/')
-
-
-conn = None
 
 def my_ag_conn(clear=False):
 	global conn
@@ -33,6 +33,7 @@ def my_ag_conn(clear=False):
 			clear=clear
 			)
 		logging.getLogger(__name__).info(f'connected.')
+		ensure_common_namespaces_are_defined(conn)
 	return conn
 
 

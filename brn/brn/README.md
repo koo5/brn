@@ -4,3 +4,8 @@ also possibly of interest: https://linkeddatafragments.org/concept/#tpf https://
 
 It should be noted that the graph is essentially application-specific, rather than datatype-specific. Iow, the graph is constructed for the purpose of processing the data in some way, by some application. Any links to/from inside the graph to the outside are ignored by such application.  
 
+"tracker 3 made it fairly easy to make federated queries, and create endpoints out of your apps. Sounds like a good fit :)"
+
+https://wiki.gnome.org/Projects/synapse
+
+etc

@@ -15,7 +15,7 @@ from .locators import *
 from .sparql_helper import *
 from pyld import jsonld
 import franz.openrdf.model
-
+import tau3_n3logic0
 
 
 
@@ -100,13 +100,14 @@ def internal():
 def parse_tau_testcases(tau_files):
 	"""Parse tau testcases in all subdirectories of main_directory.
 	main_directory is probably ../tau-tests/tests/ ."""
+
 	logging.getLogger(__name__).info("scanning " + tau_files)
 	paths = find_all_files_recursively(Path(tau_files))
 	logging.getLogger(__name__).info(f'found files: {paths}')
 
-	conn = my_ag_conn()
-
 	# ok this will need some serious explaining/visualization, like a screenshot of the generated graph
+
+	conn = my_ag_conn()
 	graph = bn(conn, 'graph')
 	uris = []
 	for id,i in enumerate(paths):
@@ -146,7 +147,6 @@ def parse_tau_testcases(tau_files):
 	})
 
 	logging.getLogger(__name__).info(f'#saved testcases IRI: {pointer}')
-	conn
 	return pointer
 
 
@@ -159,13 +159,11 @@ def parse_tau_testcases(tau_files):
 @click.option('--iri', nargs=1, type=str, required=False, help="the IRI of the testcase sequence. If omitted, rdf:value of localhost:last_tau_testcases_parsed is used")
 def run_testcases2(profile, executable, halt_on_error, limit_testcase_count, iri):
 	conn = my_ag_conn()
-	ensure_common_namespaces_are_defined(conn)
 	if iri == None:
 		pointer = select_one_result_and_one_binding(conn, "localhost:last_tau_testcases_parsed rdf:value ?pointer.")
 	else:
 		pointer = franz.openrdf.model.URI(iri)
-		#pointer = iri
-	print(pointer)
+	#print(pointer)
 	graph, result = read_pointer(conn,pointer)
 	quads = read_quads_from_context(conn,graph)
 	jld = jsonld.from_rdf({'@default':quads},{})
@@ -192,8 +190,6 @@ def run_testcases2(profile, executable, halt_on_error, limit_testcase_count, iri
 				if cmpl.returncode != 0:
 					exit()
 
-
-
 # 			while True:
 # 				q(task_uri, has_processing, X),
 # 				q(X, has_status, S),
@@ -206,3 +202,4 @@ def run_testcases2(profile, executable, halt_on_error, limit_testcase_count, iri
 
 
 
+tau3_n3logic0
