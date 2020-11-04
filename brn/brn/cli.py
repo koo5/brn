@@ -15,7 +15,7 @@ from .locators import *
 from .sparql_helper import *
 from pyld import jsonld
 import franz.openrdf.model
-import tau3_n3logic0
+#import tau3_n3logic0
 
 
 
@@ -202,4 +202,4 @@ def run_testcases2(profile, executable, halt_on_error, limit_testcase_count, iri
 
 
 
-tau3_n3logic0
+#todo fastapi tau3_n3logic0
