@@ -1,4 +1,4 @@
-what i'll be doing is running automated tests of a program i am developing. The test inputs and corresponding outputs  are stored in a convenient textual file format i call ".tau".
+what i'll be doing is running automated tests of a program i am developing. The testcases and corresponding expected outputs are stored in a convenient textual file format i call ".tau".
 
 i go through a couple steps:
 
