@@ -104,7 +104,7 @@ setup(
 		#'pytest-pythonpath==0.7.3',
 		#'pytz==2020.1',
 		#'readme-renderer==26.0',
-		'requests==2.24.0',
+		'requests==2.32.4',
 		#'requests-toolbelt==0.9.1',
 		#'rfc3986==1.4.0',
 		#'SecretStorage==3.1.2',
